@@ -28,6 +28,21 @@ function testResolve(name, context, moduleName, result) {
 			done();
 		}
 	});
+	it(name + " (sync)", function() {
+		/*var logData = [];
+		callback.log = function(line) {
+			logData.push(line);
+		}*/
+		var filename = resolve.sync({
+			environments: [
+				"web+es5+dom+xhr"
+			],
+			referrer: "test"
+		}, context, moduleName);
+
+		should.exist(filename);
+		filename.should.equal(result);
+	});
 }
 describe("concord-resolve", function() {
 	testResolve("should prefer concord main field over normal main field (outside)",
@@ -43,6 +58,10 @@ describe("concord-resolve", function() {
 		path.join(fixtures, "extensions"), "./", path.join(fixtures, "extensions", "file.css"));
 	testResolve("should use specified extensions (inside)",
 		path.join(fixtures, "extensions"), "./file", path.join(fixtures, "extensions", "file.css"));
+	testResolve("should use specified extensions (outside) (dir index)",
+		fixtures, "./extensions/dir", path.join(fixtures, "extensions", "dir", "index.ts"));
+	testResolve("should use specified extensions (inside) (dir index)",
+		path.join(fixtures, "extensions"), "./dir", path.join(fixtures, "extensions", "dir", "index.ts"));
 
 	testResolve("should use modules configuration, module (over main)",
 		fixtures, "./modules", path.join(fixtures, "modules", "correct.js"));
