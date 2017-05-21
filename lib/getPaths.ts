@@ -1,36 +1,33 @@
 /*
- MIT License http://www.opensource.org/licenses/mit-license.php
- Author Tobias Koppers @sokra
- */
+	MIT License http://www.opensource.org/licenses/mit-license.php
+	Author Tobias Koppers @sokra
+*/
 export default function getPaths(path: string) {
-    const paths = [path]
-    const pathSeqments = [] as string[]
-    const addr = [path]
-    let pathSeqment = popPathSeqment(addr)
-    while (pathSeqment) {
-        pathSeqments.push(pathSeqment)
-        paths.push(addr[0])
-        pathSeqment = popPathSeqment(addr)
+    const parts = path.split(/(.*?[\\\/]+)/);
+    const paths = [path];
+    const seqments = [parts[parts.length - 1]];
+    let part = parts[parts.length - 1];
+    path = path.substr(0, path.length - part.length - 1);
+    paths.push(path);
+    for (let i = parts.length - 2; i > 2; i -= 2) {
+        part = parts[i];
+        path = path.substr(0, path.length - part.length) || '/';
+        paths.push(path);
+        seqments.push(part.substr(0, part.length - 1));
     }
-    pathSeqments.push(paths[paths.length - 1])
+    part = parts[1];
+    seqments.push(part.length > 1 ? part.substr(0, part.length - 1) : part);
     return {
         paths,
-        seqments: pathSeqments
-    }
-}
+        seqments,
+    };
+};
 
 export function basename(path: string) {
-    return popPathSeqment([path])
-}
-
-function popPathSeqment(pathInArray: string[]) {
-    const i = pathInArray[0].lastIndexOf('/')
-    const j = pathInArray[0].lastIndexOf('\\')
-    const p = i < 0 ? j : j < 0 ? i : i < j ? j : i
-    if (p < 0) {
-        return null
-    }
-    const s = pathInArray[0].substr(p + 1)
-    pathInArray[0] = pathInArray[0].substr(0, p || 1)
-    return s
+    const i = path.lastIndexOf('/');
+    const j = path.lastIndexOf('\\');
+    const p = i < 0 ? j : j < 0 ? i : i < j ? j : i;
+    if (p < 0) return null;
+    const s = path.substr(p + 1);
+    return s;
 }

@@ -16,7 +16,6 @@ import {
     AbstractInputFileSystem
 } from './common-types'
 import { Dictionary } from './concord'
-import CachedInputFileSystem = require('./CachedInputFileSystem')
 
 const notModuleRegExp = /^\.$|^\.[\\\/]|^\.\.$|^\.\.[\/\\]|^\/|^[A-Z]:[\\\/]/i
 const directoryRegExp = /[\/\\]$/i
@@ -201,7 +200,8 @@ class Resolver extends Tapable {
         }
         if (part.request) {
             part.module = this.isModule(part.request)
-            if (part.directory = this.isDirectory(part.request)) {
+            part.directory = this.isDirectory(part.request)
+            if (part.directory) {
                 part.request = part.request.substr(0, part.request.length - 1)
             }
         }

@@ -66,7 +66,9 @@ class Storage {
             this.checkTicks();
             const data = this.data[name];
             if (data) {
-                return callback(...data);
+                return process.nextTick(function() {
+                    callback.apply(null, data);
+                });
             }
         }
         this.running[name] = running = [callback];
@@ -90,7 +92,7 @@ class Storage {
         try {
             result = provider(name);
         } catch (e) {
-            this.finishedSync(null, e);
+            this.finishedSync(name, e);
             throw e;
         }
         this.finishedSync(name, null, result);

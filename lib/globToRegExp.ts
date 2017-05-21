@@ -31,15 +31,15 @@ const SIMPLE_TOKENS: Dictionary<string> = {
     '?(': 'zero-one',
     '+(': 'one-many',
     '*(': 'zero-many',
-    '|': 'seqment-sep',
-    '/**/': 'any-path-seqments',
+    '|': 'segment-sep',
+    '/**/': 'any-path-segments',
     '**': 'any-path',
-    '*': 'any-path-seqment',
+    '*': 'any-path-segment',
     '?': 'any-char',
     '{': 'or',
     '/': 'path-sep',
     ',': 'comma',
-    ')': 'closing-seqment',
+    ')': 'closing-segment',
     '}': 'closing-or'
 }
 
@@ -87,7 +87,7 @@ function tokenize(glob: string) {
 
 function createRoot() {
     const inOr = [] as boolean[]
-    const process = createSeqment()
+    const process = createSegment()
     let initial = true
     return (token: Token) => {
         switch (token.type) {
@@ -124,8 +124,8 @@ function createRoot() {
     }
 }
 
-function createSeqment() {
-    const inSeqment = [] as string[]
+function createSegment() {
+    const inSegment = [] as string[]
     const process = createSimple()
     return (token: Token, initial: boolean) => {
         switch (token.type) {
@@ -133,10 +133,10 @@ function createSeqment() {
             case 'one-many':
             case 'zero-many':
             case 'zero-one':
-                inSeqment.push(token.type)
+                inSegment.push(token.type)
                 return '('
-            case 'seqment-sep':
-                if (inSeqment.length) {
+            case 'segment-sep':
+                if (inSegment.length) {
                     return '|'
                 }
                 else {
@@ -145,9 +145,9 @@ function createSeqment() {
                         value: '|'
                     }, initial)
                 }
-            case 'closing-seqment':
-                const seqment = inSeqment.pop()
-                switch (seqment) {
+            case 'closing-segment':
+                const segment = inSegment.pop()
+                switch (segment) {
                     case 'one':
                         return ')'
                     case 'one-many':
@@ -157,8 +157,9 @@ function createSeqment() {
                     case 'zero-one':
                         return ')?'
                 }
+                throw new Error("Unexcepted segment " + segment);
             case 'end':
-                if (inSeqment.length > 0) {
+                if (inSegment.length > 0) {
                     throw new Error('Unmatched segment, missing \')\'')
                 }
                 return process(token, initial)
@@ -173,11 +174,11 @@ function createSimple() {
         switch (token.type) {
             case 'path-sep':
                 return '[\\\\/]+'
-            case 'any-path-seqments':
+            case 'any-path-segments':
                 return '[\\\\/]+(?:(.+)[\\\\/]+)?'
             case 'any-path':
                 return '(.*)'
-            case 'any-path-seqment':
+            case 'any-path-segment':
                 if (initial) {
                     return '\\.[\\\\/]+(?:.*[\\\\/]+)?([^\\\\/]+)'
                 }
